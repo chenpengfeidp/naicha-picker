@@ -533,9 +533,7 @@
                     currentAngle = target;
                     setCarouselAngle(currentAngle);
                     spinning = false;
-                    spinBtn.disabled = false;
-                    spinBtn.textContent = '开始抽奖';
-                    setTimeout(() => showResult(winner), 350);
+                    showResult(winner);
                 }
             }
             requestAnimationFrame(tick);
@@ -556,6 +554,8 @@
 
         function hideResult() {
             overlay.classList.remove('show');
+            spinBtn.disabled = false;
+            spinBtn.textContent = '开始抽奖';
         }
 
         const cvs = document.getElementById('confetti');

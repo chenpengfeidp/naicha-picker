@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>今天喝什么奶茶？🧋</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: linear-gradient(135deg, #FFF5E6 0%, #FFE0EC 50%, #F0E6FF 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .bg-bubbles {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.12;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.12; }
+            90% { opacity: 0.12; }
+            100% { transform: translateY(-80px) rotate(720deg); opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .title {
+            font-size: clamp(26px, 7vw, 40px);
+            font-weight: 900;
+            background: linear-gradient(135deg, #E91E63 0%, #FF6F00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            font-size: clamp(13px, 3.5vw, 16px);
+            color: #B0A0A0;
+            margin-bottom: clamp(20px, 4vh, 40px);
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            margin-bottom: clamp(24px, 4vh, 40px);
+        }
+
+        .scene {
+            width: clamp(280px, 80vw, 380px);
+            height: clamp(200px, 45vw, 260px);
+            perspective: 1100px;
+            perspective-origin: 50% 50%;
+            position: relative;
+        }
+
+        .scene::before {
+            content: '▼';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 22px;
+            color: #FF6B6B;
+            z-index: 10;
+            filter: drop-shadow(0 2px 6px rgba(255, 107, 107, 0.5));
+            animation: pointerBounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pointerBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(4px); }
+        }
+
+        .select-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 132px;
+            margin-left: -50px;
+            margin-top: -66px;
+            border: 2.5px solid rgba(255, 107, 107, 0.6);
+            border-radius: 18px;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.15), inset 0 0 20px rgba(255, 107, 107, 0.05);
+        }
+
+        .carousel {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
+        }
+
+        .card {
+            position: absolute;
+            width: 90px;
+            height: 120px;
+            left: 50%;
+            top: 50%;
+            margin-left: -45px;
+            margin-top: -60px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 6px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .card-logo {
+            width: 54px;
+            height: 54px;
+            margin-bottom: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-logo svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .card-name {
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.3;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .card-en {
+            font-size: 7px;
+            color: #BBB;
+            text-align: center;
+            margin-top: 1px;
+            letter-spacing: 0.5px;
+        }
+
+        .spin-btn {
+            width: clamp(180px, 50vw, 220px);
+            height: 54px;
+            border: none;
+            border-radius: 27px;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 6px;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.35);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            z-index: 2;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .spin-btn::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53, #FFD700, #FF6B6B);
+            background-size: 300% 300%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+            animation: shimmer 3s ease infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .spin-btn:hover::after { opacity: 1; }
+
+        .spin-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .spin-btn:disabled::after { opacity: 0 !important; }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 44px 36px 36px;
+            text-align: center;
+            transform: scale(0.7) translateY(30px);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+            max-width: 320px;
+            width: 85%;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .overlay.show .result-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .result-logo {
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+        }
+
+        .result-logo svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0) rotate(-20deg); }
+            to { transform: scale(1) rotate(0); }
+        }
+
+        .result-name {
+            font-size: 30px;
+            font-weight: 900;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .result-en {
+            font-size: 13px;
+            color: #BBB;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .result-slogan {
+            font-size: 17px;
+            color: #FF6B6B;
+            margin-bottom: 28px;
+            font-weight: 600;
+        }
+
+        .again-btn {
+            width: 170px;
+            height: 46px;
+            border: 2px solid #FF6B6B;
+            border-radius: 23px;
+            background: transparent;
+            color: #FF6B6B;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            -webkit-appearance: none;
+            letter-spacing: 2px;
+        }
+
+        .again-btn:active {
+            background: #FF6B6B;
+            color: white;
+            transform: scale(0.95);
+        }
+
+        @media (hover: hover) {
+            .again-btn:hover {
+                background: #FF6B6B;
+                color: white;
+            }
+        }
+
+        #confetti {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 101;
+            pointer-events: none;
+        }
+
+        .brand-hint {
+            margin-top: clamp(16px, 3vh, 28px);
+            font-size: 12px;
+            color: #CCC;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-bubbles" id="bgBubbles"></div>
+
+    <div class="container">
+        <h1 class="title">今天喝什么奶茶？🧋</h1>
+        <p class="subtitle">选择困难？让命运来帮你决定！</p>
+
+        <div class="wheel-wrapper">
+            <div class="scene">
+                <div class="select-frame"></div>
+                <div class="carousel" id="carousel"></div>
+            </div>
+        </div>
+
+        <button class="spin-btn" id="spinBtn">开始抽奖</button>
+        <p class="brand-hint">集合 15 大热门奶茶品牌</p>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <div class="result-card" id="resultCard">
+            <div class="result-logo" id="resultLogo"></div>
+            <h2 class="result-name" id="resultName"></h2>
+            <p class="result-en" id="resultEn"></p>
+            <p class="result-slogan">✨ 就决定是你了！✨</p>
+            <button class="again-btn" id="againBtn">再来一次</button>
+        </div>
+    </div>
+
+    <canvas id="confetti"></canvas>
+
+    <script>
+        const brands = [
+            {
+                name: '喜茶', en: 'HEYTEA', color: '#E4007F',
+                svg: `<svg viewBox="0 0 120 120"><path d="M47 55C45 28 43 6 50 2C55-1 58 14 58 32V50Z" fill="#E4007F"/><path d="M73 55C75 28 77 6 70 2C65-1 62 14 62 32V50Z" fill="#E4007F"/><ellipse cx="60" cy="78" rx="28" ry="26" fill="#E4007F"/><circle cx="51" cy="72" r="4" fill="#fff"/><circle cx="69" cy="72" r="4" fill="#fff"/><ellipse cx="60" cy="86" rx="5" ry="3" fill="#fff" fill-opacity=".45"/></svg>`
+            },
+            {
+                name: '奈雪的茶', en: 'NAYUKI', color: '#8DC21F',
+                svg: `<svg viewBox="0 0 120 120"><rect x="5" y="5" width="110" height="110" rx="12" fill="#8DC21F"/><text x="60" y="50" text-anchor="middle" fill="#fff" font-size="30" font-weight="900" font-family="PingFang SC,STHeiti,sans-serif">奈雪</text><text x="60" y="88" text-anchor="middle" fill="#fff" font-size="30" font-weight="900" font-family="PingFang SC,STHeiti,sans-serif">的茶</text></svg>`
+            },
+            {
+                name: '茶百道', en: 'ChaPanda', color: '#009AD6',
+                svg: `<svg viewBox="0 0 120 120"><circle cx="34" cy="26" r="16" fill="#009AD6"/><circle cx="86" cy="26" r="16" fill="#009AD6"/><circle cx="60" cy="68" r="42" fill="#009AD6"/><circle cx="60" cy="70" r="34" fill="#fff"/><ellipse cx="44" cy="62" rx="12" ry="14" fill="#009AD6"/><ellipse cx="76" cy="62" rx="12" ry="14" fill="#009AD6"/><circle cx="44" cy="60" r="5" fill="#fff"/><circle cx="76" cy="60" r="5" fill="#fff"/><ellipse cx="60" cy="82" rx="7" ry="4" fill="#009AD6"/></svg>`
+            },
+            {
+                name: '蜜雪冰城', en: 'MIXUE', color: '#E60012',
+                svg: `<svg viewBox="0 0 120 120"><circle cx="60" cy="82" r="32" fill="#fff" stroke="#ddd" stroke-width="2"/><circle cx="60" cy="44" r="22" fill="#fff" stroke="#ddd" stroke-width="2"/><polygon points="46,26 60,4 74,26" fill="#FFD700" stroke="#DAA520" stroke-width="1.5"/><circle cx="52" cy="40" r="3" fill="#333"/><circle cx="68" cy="40" r="3" fill="#333"/><path d="M54 50Q60 56 66 50" stroke="#E60012" stroke-width="2.5" fill="none" stroke-linecap="round"/><line x1="28" y1="72" x2="18" y2="58" stroke="#8B4513" stroke-width="3" stroke-linecap="round"/><line x1="92" y1="72" x2="102" y2="58" stroke="#8B4513" stroke-width="3" stroke-linecap="round"/></svg>`
+            },
+            {
+                name: '古茗', en: 'GOOD ME', color: '#1a1a1a',
+                svg: `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="none" stroke="#1a1a1a" stroke-width="5"/><circle cx="60" cy="60" r="45" fill="none" stroke="#1a1a1a" stroke-width="2"/><text x="60" y="78" text-anchor="middle" fill="#1a1a1a" font-size="58" font-weight="900" font-family="STSong,SimSun,serif">古</text></svg>`
+            },
+            {
+                name: '书亦烧仙草', en: 'SHUYI', color: '#1a1a1a',
+                svg: `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="#1a1a1a"/><circle cx="60" cy="32" r="12" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M55 20C55 20 52 14 60 10C68 14 65 20 65 20" fill="#fff"/><path d="M60 44V78" stroke="#fff" stroke-width="2.5"/><path d="M44 58L60 50L76 58" stroke="#fff" stroke-width="2.5" fill="none"/><path d="M46 98L60 78L74 98" stroke="#fff" stroke-width="2.5" fill="none"/></svg>`
+            },
+            {
+                name: '沪上阿姨', en: 'AUNTEA JENNY', color: '#1a1a1a',
+                svg: `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="#1a1a1a"/><circle cx="60" cy="32" r="11" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M50 24Q52 16 60 14Q68 16 70 24" fill="#fff"/><path d="M48 46L60 42L72 46L70 80H50Z" fill="#fff"/><rect x="72" y="52" width="18" height="7" rx="3.5" fill="#fff"/><path d="M50 80L46 100" stroke="#fff" stroke-width="2.5"/><path d="M70 80L74 100" stroke="#fff" stroke-width="2.5"/></svg>`
+            },
+            {
+                name: '一点点', en: 'YIDIANDIAN', color: '#00B3A0',
+                svg: `<svg viewBox="0 0 120 120"><rect width="120" height="120" rx="12" fill="#fff"/><text x="40" y="90" fill="#00B3A0" font-size="82" font-weight="900" font-family="Arial,sans-serif">1</text><text x="78" y="50" text-anchor="middle" fill="#00B3A0" font-size="22" font-weight="bold" font-family="STKaiti,KaiTi,serif">點</text><text x="78" y="78" text-anchor="middle" fill="#00B3A0" font-size="22" font-weight="bold" font-family="STKaiti,KaiTi,serif">點</text></svg>`
+            },
+            {
+                name: 'CoCo都可', en: 'COCO', color: '#FF6A00',
+                svg: `<svg viewBox="0 0 120 120"><rect width="120" height="120" rx="12" fill="#fff"/><text x="60" y="58" text-anchor="middle" fill="#FF6A00" font-size="34" font-weight="bold" font-family="Arial,sans-serif">CoCo</text><text x="60" y="90" text-anchor="middle" fill="#FF6A00" font-size="26" font-weight="bold" font-family="PingFang SC,sans-serif">都可</text><circle cx="100" cy="28" r="12" fill="#FF6A00"/><circle cx="96" cy="26" r="2.5" fill="#fff"/><circle cx="104" cy="26" r="2.5" fill="#fff"/><path d="M95 32Q100 36 105 32" stroke="#fff" stroke-width="1.5" fill="none"/></svg>`
+            },
+            {
+                name: '茶颜悦色', en: 'CHAYANYUESE', color: '#8B0000',
+                svg: `<svg viewBox="0 0 120 120"><polygon points="60,4 90,18 108,48 108,72 90,102 60,116 30,102 12,72 12,48 30,18" fill="#8B1A1A" stroke="#D4A060" stroke-width="3"/><text x="60" y="52" text-anchor="middle" fill="#D4A060" font-size="24" font-weight="bold" font-family="STKaiti,KaiTi,serif">茶颜</text><text x="60" y="82" text-anchor="middle" fill="#D4A060" font-size="24" font-weight="bold" font-family="STKaiti,KaiTi,serif">悦色</text></svg>`
+            },
+            {
+                name: '霸王茶姬', en: 'CHAGEE', color: '#C8102E',
+                svg: `<svg viewBox="0 0 120 120"><rect width="120" height="120" rx="10" fill="#C8102E"/><ellipse cx="60" cy="72" rx="18" ry="20" fill="#fff"/><path d="M38 58Q38 28 60 20Q82 28 82 58" fill="#fff"/><circle cx="60" cy="16" r="6" fill="#FFD700" stroke="#fff" stroke-width="1"/><circle cx="42" cy="28" r="4" fill="#FFD700"/><circle cx="78" cy="28" r="4" fill="#FFD700"/><path d="M34 56L28 48" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M86 56L92 48" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><circle cx="53" cy="68" r="2.5" fill="#C8102E"/><circle cx="67" cy="68" r="2.5" fill="#C8102E"/><path d="M55 78Q60 82 65 78" stroke="#C8102E" stroke-width="1.5" fill="none"/></svg>`
+            },
+            {
+                name: '益禾堂', en: 'YIHETANG', color: '#2E7D32',
+                svg: `<svg viewBox="0 0 120 120"><rect width="120" height="120" rx="12" fill="#2E7D32"/><path d="M60 20C60 20 40 45 40 65C40 76 49 85 60 85C71 85 80 76 80 65C80 45 60 20 60 20Z" fill="#fff"/><path d="M55 55C55 55 60 48 65 55" stroke="#2E7D32" stroke-width="2" fill="none"/><text x="60" y="112" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">益禾堂</text></svg>`
+            },
+            {
+                name: '小芳茶铺', en: 'XIAOFANG', color: '#F57C00',
+                svg: `<svg viewBox="0 0 120 120"><rect width="120" height="120" rx="12" fill="#F57C00"/><text x="60" y="82" text-anchor="middle" fill="#fff" font-size="80" font-weight="900" font-family="Arial Black,Arial,sans-serif">小芳</text><text x="60" y="112" text-anchor="middle" fill="#fff" font-size="20" font-weight="bold">茶铺</text></svg>`
+            },
+            {
+                name: '牡丹亭', en: 'MEITINGTING', color: '#7E57C2',
+                svg: `<svg viewBox="0 0 120 120"><rect width="120" height="120" rx="12" fill="#7E57C2"/><text x="60" y="48" text-anchor="middle" fill="#fff" font-size="28" font-weight="900" font-family="PingFang SC,sans-serif">牡丹</text><text x="60" y="82" text-anchor="middle" fill="#fff" font-size="28" font-weight="900" font-family="PingFang SC,sans-serif">亭</text><circle cx="30" cy="100" r="5" fill="#FFD700" fill-opacity=".6"/><circle cx="90" cy="100" r="5" fill="#FFD700" fill-opacity=".6"/><circle cx="60" cy="105" r="3" fill="#FFD700" fill-opacity=".4"/></svg>`
+            },
+        ];
+
+        const COUNT  = brands.length;
+        const DEG    = 360 / COUNT;
+        const RADIUS = 240;
+
+        let currentAngle = 0;
+        let spinning = false;
+        let autoRAF  = null;
+
+        const carousel = document.getElementById('carousel');
+        const spinBtn  = document.getElementById('spinBtn');
+        const overlay  = document.getElementById('overlay');
+        const againBtn = document.getElementById('againBtn');
+
+        function setCarouselAngle(angle) {
+            carousel.style.transform = `rotateY(${angle}deg)`;
+        }
+
+        function initCarousel() {
+            brands.forEach((b, i) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML =
+                    `<div class="card-logo">${b.svg}</div>` +
+                    `<div class="card-name">${b.name}</div>` +
+                    `<div class="card-en">${b.en}</div>`;
+                card.style.transform =
+                    `rotateY(${i * DEG}deg) translateZ(${RADIUS}px)`;
+                carousel.appendChild(card);
+            });
+            setCarouselAngle(0);
+        }
+
+        function spin() {
+            if (spinning) return;
+            spinning = true;
+            spinBtn.disabled = true;
+            spinBtn.textContent = '抽奖中…';
+
+            const winner = Math.floor(Math.random() * COUNT);
+            const landAt = (360 - winner * DEG) % 360;
+            const base   = Math.ceil(currentAngle / 360) * 360;
+            const extra  = (5 + Math.floor(Math.random() * 4)) * 360;
+            let target   = base + extra + landAt;
+            if (target <= currentAngle + 360) target += 360;
+
+            const start = currentAngle;
+            const delta = target - start;
+            const dur   = 5000 + Math.random() * 2000;
+            let t0 = null;
+
+            function ease(t) { return 1 - Math.pow(1 - t, 5); }
+
+            function tick(ts) {
+                if (!t0) t0 = ts;
+                const p = Math.min((ts - t0) / dur, 1);
+                currentAngle = start + delta * ease(p);
+                setCarouselAngle(currentAngle);
+
+                if (p < 1) {
+                    requestAnimationFrame(tick);
+                } else {
+                    currentAngle = target;
+                    setCarouselAngle(currentAngle);
+                    spinning = false;
+                    spinBtn.disabled = false;
+                    spinBtn.textContent = '开始抽奖';
+                    setTimeout(() => showResult(winner), 350);
+                }
+            }
+            requestAnimationFrame(tick);
+        }
+
+        function showResult(idx) {
+            const b = brands[idx];
+            const logo = document.getElementById('resultLogo');
+            logo.innerHTML = b.svg;
+            logo.style.animation = 'none';
+            void logo.offsetWidth;
+            logo.style.animation = '';
+            document.getElementById('resultName').textContent = b.name;
+            document.getElementById('resultEn').textContent = b.en;
+            overlay.classList.add('show');
+            fireConfetti();
+        }
+
+        function hideResult() {
+            overlay.classList.remove('show');
+        }
+
+        const cvs = document.getElementById('confetti');
+        const ctx = cvs.getContext('2d');
+        let particles = [];
+        let cRaf = null;
+
+        function sizeCanvas() {
+            cvs.width  = innerWidth;
+            cvs.height = innerHeight;
+        }
+
+        function fireConfetti() {
+            sizeCanvas();
+            particles = [];
+            const palette = [
+                '#FF6B6B','#FFE66D','#4ECDC4','#A8E6CF',
+                '#FF8B94','#F7DC6F','#BB8FCE','#85C1E9',
+                '#F8C471','#82E0AA','#FFDAC1','#C7CEEA'
+            ];
+            for (let i = 0; i < 180; i++) {
+                particles.push({
+                    x: cvs.width / 2 + (Math.random() - 0.5) * 200,
+                    y: cvs.height / 2,
+                    w: Math.random() * 10 + 4,
+                    h: Math.random() * 6 + 3,
+                    c: palette[Math.floor(Math.random() * palette.length)],
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 1) * 14,
+                    g: 0.18 + Math.random() * 0.08,
+                    r: Math.random() * 360,
+                    rs: (Math.random() - 0.5) * 14,
+                    a: 1,
+                });
+            }
+            if (cRaf) cancelAnimationFrame(cRaf);
+            drawConfetti();
+        }
+
+        function drawConfetti() {
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+            let alive = false;
+            particles.forEach(p => {
+                p.x  += p.vx;
+                p.y  += p.vy;
+                p.vy += p.g;
+                p.r  += p.rs;
+                p.vx *= 0.99;
+                if (p.y > cvs.height + 40) p.a -= 0.05;
+                if (p.a <= 0) return;
+                alive = true;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.r * Math.PI / 180);
+                ctx.globalAlpha = Math.max(0, p.a);
+                ctx.fillStyle = p.c;
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
+            });
+            if (alive) cRaf = requestAnimationFrame(drawConfetti);
+            else ctx.clearRect(0, 0, cvs.width, cvs.height);
+        }
+
+        function createBubbles() {
+            const box = document.getElementById('bgBubbles');
+            const cols = ['#FFB7C5','#B5EAD7','#FFDAC1','#C7CEEA','#E2F0CB','#FFE0AC','#D4A5FF'];
+            for (let i = 0; i < 18; i++) {
+                const d = document.createElement('div');
+                d.className = 'bubble';
+                const s = Math.random() * 36 + 12;
+                Object.assign(d.style, {
+                    width: s + 'px',
+                    height: s + 'px',
+                    left: Math.random() * 100 + '%',
+                    background: cols[Math.floor(Math.random() * cols.length)],
+                    animationDuration: (Math.random() * 12 + 12) + 's',
+                    animationDelay: (Math.random() * 18) + 's',
+                });
+                box.appendChild(d);
+            }
+        }
+
+        function autoRotate() {
+            if (!spinning && !overlay.classList.contains('show')) {
+                currentAngle += 0.15;
+                setCarouselAngle(currentAngle);
+            }
+            autoRAF = requestAnimationFrame(autoRotate);
+        }
+
+        spinBtn.addEventListener('click', spin);
+        againBtn.addEventListener('click', hideResult);
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) hideResult();
+        });
+
+        createBubbles();
+        initCarousel();
+        autoRotate();
+    </script>
+</body>
+</html>

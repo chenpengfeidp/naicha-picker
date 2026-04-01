@@ -25,6 +25,33 @@
 
 👉 [点击打开](https://chenpengfeidp.github.io/naicha-picker/)
 
+## 部署到 Vercel
+
+这个项目是纯静态页面，已经可以直接部署到 Vercel。
+
+### 方式一：网页导入 GitHub 仓库
+
+1. 把当前项目推送到 GitHub 仓库
+2. 打开 Vercel 后选择 `Add New...` -> `Project`
+3. 导入这个仓库
+4. `Framework Preset` 选择 `Other`
+5. 如果界面里自动填了 `Build Command`，将其留空
+6. 点击 `Deploy`
+
+### 方式二：本地命令行部署
+
+```bash
+npx vercel
+```
+
+正式环境发布：
+
+```bash
+npx vercel --prod
+```
+
+仓库内已包含 `vercel.json`，用于显式声明这是一个无需构建的静态站点配置。
+
 ## 技术
 
 纯 HTML + CSS + JavaScript，单文件，零依赖，零构建。
